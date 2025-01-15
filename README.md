@@ -77,4 +77,13 @@ accuracy_score and classification_report: Evaluate the model’s performance.
 
 # OUTPUT:
 
+![image](https://github.com/user-attachments/assets/7ba7f9d0-efdc-4e53-9f50-b474a0e479db)
 
+
+![image](https://github.com/user-attachments/assets/71736ec1-20ca-441d-906b-357c92fa1f52)
+
+
+![image](https://github.com/user-attachments/assets/1b109091-5fd8-4452-b071-0c4a42691e34)
+
+
+![image](https://github.com/user-attachments/assets/dc1f0b3f-7ca9-49ec-87a5-0383a6716126)
