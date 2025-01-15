@@ -1,0 +1,106 @@
+import pandas as pd
+import numpy as np
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report, accuracy_score
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+# Load the dataset
+data = pd.read_csv('covid_tweets.csv')
+# Display basic information about the dataset
+print("Dataset Info:")
+print(data.info())
+print("\nSample Data:")
+print(data.head())
+# Preprocessing
+stop_words = set(stopwords.words('english'))
+
+def preprocess_text(text):
+    # Convert to lowercase
+    text = text.lower()
+    # Tokenize
+    tokens = word_tokenize(text)
+    # Remove stopwords and non-alphabetic tokens
+    filtered_tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
+    return " ".join(filtered_tokens)
+# Apply preprocessing
+data['cleaned_text'] = data['text'].apply(preprocess_text)
+# Labeling Sentiment (Example: Positive if contains 'good', Negative otherwise)
+# Modify this part as per your dataset labeling strategy
+positive_words = ['good', 'great', 'positive', 'excellent']
+data['sentiment'] = data['cleaned_text'].apply(lambda x: 'Positive' if any(word in x for word in positive_words) else 'Negative')
+# Splitting the dataset
+X = data['cleaned_text']
+y = data['sentiment']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Vectorization
+vectorizer = CountVectorizer()
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+# Model Training
+model = MultinomialNB()
+model.fit(X_train_vec, y_train)
+# Prediction
+y_pred = model.predict(X_test_vec)
+# Evaluation
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+# Insights
+positive_count = data[data['sentiment'] == 'Positive'].shape[0]
+negative_count = data[data['sentiment'] == 'Negative'].shape[0]
+print("\nNumber of Positive Tweets:", positive_count)
+print("Number of Negative Tweets:", negative_count)
+!pip install wordcloud
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Take a subset of the dataset (first 500 rows)
+subset_data = data.head(500)
+
+# Plot the distribution of sentiments in the subset
+plt.figure(figsize=(8, 5))
+sentiment_counts = subset_data['sentiment'].value_counts()
+sns.barplot(x=sentiment_counts.index, y=sentiment_counts.values, palette='viridis')
+plt.title('Sentiment Distribution in Subset (First 500 Rows)')
+plt.xlabel('Sentiment')
+plt.ylabel('Count')
+plt.show()
+
+# Word cloud visualization for positive and negative sentiments
+from wordcloud import WordCloud
+
+# Positive sentiment word cloud
+positive_text = " ".join(subset_data[subset_data['sentiment'] == 'Positive']['cleaned_text'])
+wordcloud_positive = WordCloud(width=800, height=400, background_color='white').generate(positive_text)
+
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud_positive, interpolation='bilinear')
+plt.axis('off')
+plt.title('Word Cloud for Positive Sentiments')
+plt.show()
+
+# Negative sentiment word cloud
+negative_text = " ".join(subset_data[subset_data['sentiment'] == 'Negative']['cleaned_text'])
+wordcloud_negative = WordCloud(width=800, height=400, background_color='black', colormap='Reds').generate(negative_text)
+
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud_negative, interpolation='bilinear')
+plt.axis('off')
+plt.title('Word Cloud for Negative Sentiments')
+plt.show()
+
+# Line plot showing trends in sentiment over the subset
+subset_data['row_index'] = subset_data.index
+sentiment_trend = subset_data.groupby(['row_index', 'sentiment']).size().unstack(fill_value=0)
+
+plt.figure(figsize=(10, 5))
+sentiment_trend.plot(ax=plt.gca(), marker='o')
+plt.title('Sentiment Trends Over First 500 Rows')
+plt.xlabel('Row Index')
+plt.ylabel('Count')
+plt.legend(title='Sentiment')
+plt.show()
