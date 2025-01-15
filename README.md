@@ -73,3 +73,8 @@ train_test_split: Splits the dataset into training and testing subsets.
 CountVectorizer: Converts text data into numerical feature vectors (Bag-of-Words representation).
 MultinomialNB: Implements the Naive Bayes algorithm for text classification.
 accuracy_score and classification_report: Evaluate the model’s performance.
+
+
+# OUTPUT:
+
+
